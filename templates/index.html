@@ -1,91 +1,270 @@
-from flask import Flask, render_template, request, jsonify
-import math
-import re
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Калькулятор</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="wrapper" id="wrapper">
+        <div class="header">
+            <button id="toggle-extra" aria-label="extra"><i class="fa-solid fa-calculator"></i></button>
+        </div>
 
-app = Flask(__name__)
+        <div class="main-area" id="mainArea">
+            <div id="display">0</div>
 
-def safe_eval(expression):
-    """Безопасное вычисление математических выражений"""
-    try:
-        print(f"Вычисляем: {expression}")
-        
-        # Заменяем запятые на точки для десятичных чисел
-        expression = expression.replace(',', '.')
-        print(f"После замены запятых: {expression}")
-        
-        # Заменяем специальные математические функции и символы
-        expression = expression.replace('×', '*').replace('÷', '/').replace('−', '-')
-        expression = expression.replace('^', '**')
-        print(f"После замены операторов: {expression}")
-        
-        # Обработка процентов - заменяем 50% на (50/100)
-        expression = re.sub(r'(\d+(?:\.\d+)?)%', r'(\1/100)', expression)
-        print(f"После обработки процентов: {expression}")
-        
-        # Обработка математических функций
-        expression = re.sub(r'sqrt\(([^)]+)\)', r'math.sqrt(\1)', expression)
-        expression = re.sub(r'sin\(([^)]+)\)', r'math.sin(math.radians(\1))', expression)
-        expression = re.sub(r'cos\(([^)]+)\)', r'math.cos(math.radians(\1))', expression)
-        expression = re.sub(r'tan\(([^)]+)\)', r'math.tan(math.radians(\1))', expression)
-        expression = re.sub(r'log\(([^)]+)\)', r'math.log10(\1)', expression)
-        expression = re.sub(r'ln\(([^)]+)\)', r'math.log(\1)', expression)
-        print(f"После обработки функций: {expression}")
-        
-        # Удаляем все пробелы
-        expression = expression.replace(' ', '')
-        print(f"После удаления пробелов: {expression}")
-        
-        # Проверяем на безопасные символы
-        allowed_chars = set('0123456789+-*/.()abcdefghijklmnopqrstuvwxyz')
-        if any(char not in allowed_chars for char in expression.lower()):
-            return "Ошибка: Недопустимые символы"
-        
-        # Вычисляем выражение
-        result = eval(expression, {"__builtins__": None}, {"math": math})
-        print(f"Результат вычисления: {result}")
-        
-        # Форматируем результат
-        if result == int(result):
-            final_result = str(int(result))
-        else:
-            final_result = f"{result:.10f}".rstrip('0').rstrip('.').replace('.', ',')
-        
-        print(f"Финальный результат: {final_result}")
-        return final_result
+            <div class="extra-panel" id="extraPanel" aria-hidden="true">
+                <div class="extra-grid">
+                    <button data-value="(">(</button>
+                    <button data-value=")">)</button>
+                    <button data-value="^">x²</button>
+
+                    <button data-value="sqrt(">√</button>
+                    <button data-value="sin(">sin</button>
+                    <button data-value="cos(">cos</button>
+
+                    <button data-value="tan(">tan</button>
+                    <button data-value="log(">log</button>
+                    <button data-value="ln(">ln</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="calculator">
+            <div class="col-left">
+                <div class="row">
+                    <button class="btn top" id="clear">C</button>
+                    <button class="btn top" id="plusminus"><i class="fa-solid fa-plus-minus"></i></button>
+                    <button class="btn top" id="percent">%</button>
+                </div>
+
+                <div class="digits">
+                    <div class="digits-row">
+                        <button class="btn num">7</button>
+                        <button class="btn num">8</button>
+                        <button class="btn num">9</button>
+                    </div>
+                    <div class="digits-row">
+                        <button class="btn num">4</button>
+                        <button class="btn num">5</button>
+                        <button class="btn num">6</button>
+                    </div>
+                    <div class="digits-row">
+                        <button class="btn num">1</button>
+                        <button class="btn num">2</button>
+                        <button class="btn num">3</button>
+                    </div>
+                    <div class="digits-row">
+                        <button class="btn num zero">0</button>
+                        <button class="btn num" id="dot">,</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-right">
+                <button class="btn op" data-op="/">÷</button>
+                <button class="btn op" data-op="*">×</button>
+                <button class="btn op" data-op="-">−</button>
+                <button class="btn op" data-op="+">+</button>
+                <button class="btn op" id="equals">=</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+(function(){
+    const toggle = document.getElementById('toggle-extra');
+    const extra = document.getElementById('extraPanel');
+    const mainArea = document.getElementById('mainArea');
+    const wrapper = document.getElementById('wrapper');
+    const display = document.getElementById('display');
+
+    let currentValue = '0';
+    let resetOnNextInput = false;
+
+    function updateDisplay() {
+        display.textContent = currentValue;
+        display.scrollLeft = display.scrollWidth;
+    }
+
+    async function calculateResult() {
+        try {
+            let expression = currentValue;
             
-    except ZeroDivisionError:
-        return "Ошибка: Деление на ноль"
-    except Exception as e:
-        print(f"Ошибка при вычислении: {str(e)}")
-        return f"Ошибка: {str(e)}"
+            // Убираем = если есть
+            if (expression.endsWith('=')) {
+                expression = expression.slice(0, -1);
+            }
+            
+            const response = await fetch('/calculate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ expression: expression })
+            });
+            
+            const data = await response.json();
+            currentValue = data.result;
+            resetOnNextInput = true;
+            updateDisplay();
+            
+        } catch (error) {
+            currentValue = 'Ошибка';
+            resetOnNextInput = true;
+            updateDisplay();
+        }
+    }
 
-@app.route('/')
-def index():
-    return render_template('index.html')
+    function handleNumber(num) {
+        if (resetOnNextInput || currentValue === '0' || currentValue === 'Ошибка') {
+            currentValue = num;
+            resetOnNextInput = false;
+        } else {
+            currentValue += num;
+        }
+        updateDisplay();
+    }
 
-@app.route('/calculate', methods=['POST'])
-def calculate():
-    try:
-        data = request.get_json()
-        print(f"Полученные данные: {data}")
-        
-        if not data:
-            return jsonify({'result': 'Ошибка: Нет данных'})
-        
-        expression = data.get('expression', '')
-        print(f"Выражение для вычисления: '{expression}'")
-        
-        if not expression:
-            return jsonify({'result': '0'})
-        
-        result = safe_eval(expression)
-        print(f"Возвращаем результат: {result}")
-        
-        return jsonify({'result': result})
-    
-    except Exception as e:
-        print(f"Ошибка в /calculate: {str(e)}")
-        return jsonify({'result': f'Ошибка сервера: {str(e)}'})
+    function handleZero() {
+        if (resetOnNextInput || currentValue === 'Ошибка') {
+            currentValue = '0';
+            resetOnNextInput = false;
+        } else if (currentValue !== '0') {
+            currentValue += '0';
+        }
+        updateDisplay();
+    }
 
-if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    function handleOperator(op) {
+        if (resetOnNextInput) {
+            resetOnNextInput = false;
+        }
+        
+        if (/[+\-*/]$/.test(currentValue)) {
+            currentValue = currentValue.slice(0, -1) + op;
+        } else {
+            currentValue += op;
+        }
+        updateDisplay();
+    }
+
+    function handleDecimal() {
+        if (resetOnNextInput || currentValue === 'Ошибка') {
+            currentValue = '0,';
+            resetOnNextInput = false;
+        } else {
+            const parts = currentValue.split(/[+\-*/]/);
+            const lastPart = parts[parts.length - 1];
+            if (!lastPart.includes(',')) {
+                currentValue += ',';
+            }
+        }
+        updateDisplay();
+    }
+
+    function handleClear() {
+        currentValue = '0';
+        resetOnNextInput = false;
+        updateDisplay();
+    }
+
+    function handlePlusMinus() {
+        if (currentValue !== '0' && currentValue !== 'Ошибка') {
+            if (currentValue.startsWith('-')) {
+                currentValue = currentValue.slice(1);
+            } else {
+                currentValue = '-' + currentValue;
+            }
+            updateDisplay();
+        }
+    }
+
+    function handlePercent() {
+        if (currentValue !== '0' && currentValue !== 'Ошибка') {
+            currentValue += '%';
+            updateDisplay();
+        }
+    }
+
+    function handleFunction(func) {
+        if (resetOnNextInput || currentValue === '0' || currentValue === 'Ошибка') {
+            currentValue = func;
+            resetOnNextInput = false;
+        } else {
+            currentValue += func;
+        }
+        updateDisplay();
+    }
+
+    // Обработчики событий
+    toggle.addEventListener('click', () => {
+        const shown = extra.classList.toggle('show');
+        extra.setAttribute('aria-hidden', !shown);
+        if (shown) {
+            mainArea.classList.add('compact');
+            wrapper.classList.add('compact');
+        } else {
+            mainArea.classList.remove('compact');
+            wrapper.classList.remove('compact');
+        }
+    });
+
+    // Цифры 1-9
+    document.querySelectorAll('.num:not(.zero)').forEach(button => {
+        button.addEventListener('click', () => {
+            handleNumber(button.textContent.trim());
+        });
+    });
+
+    // Ноль
+    document.querySelector('.zero').addEventListener('click', handleZero);
+
+    // Точка
+    document.getElementById('dot').addEventListener('click', handleDecimal);
+
+    // Очистка
+    document.getElementById('clear').addEventListener('click', handleClear);
+
+    // ±
+    document.getElementById('plusminus').addEventListener('click', handlePlusMinus);
+
+    // %
+    document.getElementById('percent').addEventListener('click', handlePercent);
+
+    // Операторы (кроме равно)
+    document.querySelectorAll('.op:not(#equals)').forEach(button => {
+        button.addEventListener('click', () => {
+            const op = button.getAttribute('data-op') || button.textContent.trim();
+            handleOperator(op);
+        });
+    });
+
+    // Равно
+    document.getElementById('equals').addEventListener('click', () => {
+        if (currentValue !== 'Ошибка') {
+            calculateResult();
+        }
+    });
+
+    // Дополнительные функции
+    document.querySelectorAll('.extra-grid button').forEach(button => {
+        button.addEventListener('click', () => {
+            let func = button.getAttribute('data-value') || button.textContent.trim();
+            if (func === '^') {
+                func = '^2';
+            }
+            handleFunction(func);
+        });
+    });
+
+    // Инициализация
+    updateDisplay();
+})();
+</script>
+</body>
+</html>
