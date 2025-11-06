@@ -1,0 +1,223 @@
+:root{
+    --bg:#000;
+    --panel:#111;
+    --muted:#333;
+    --ios-yellow:#f1a33c;
+    --light:#a5a5a5;
+    --button-size:70px;
+    --button-gap:10px;
+    --border-radius:20px;
+}
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+html,body{
+    height:100%;
+}
+body{
+    font-family:"Comfortaa",sans-serif;
+    background:var(--bg);
+    -webkit-font-smoothing:antialiased;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+}
+.wrapper{
+    width:100%;
+    max-width:400px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:15px;
+}
+.header{
+    width:100%;
+    display:flex;
+    justify-content:flex-end;
+}
+.header button{
+    background:var(--ios-yellow);
+    color:#fff;
+    border:0;
+    width:50px;
+    height:50px;
+    border-radius:50%;
+    font-size:20px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    transition:transform 0.1s ease,background 0.2s ease;
+}
+.header button:active{
+    transform:scale(0.95);
+}
+.main-area{
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:15px;
+}
+#display{
+    width:100%;
+    background:var(--panel);
+    color:#fff;
+    padding:20px 25px;
+    border-radius:var(--border-radius);
+    font-size:48px;
+    text-align:right;
+    min-height:80px;
+    overflow-x:auto;
+    white-space:nowrap;
+    font-weight:300;
+    box-shadow:0 4px 10px rgba(0,0,0,0.2);
+}
+.extra-panel{
+    width:100%;
+    overflow:hidden;
+    transition:all 0.3s ease;
+    max-height:0;
+    opacity:0;
+}
+.extra-panel.show{
+    max-height:200px;
+    opacity:1;
+}
+.extra-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:var(--button-gap);
+    width:100%;
+}
+.extra-grid button{
+    height:60px;
+    border-radius:var(--border-radius);
+    background:var(--muted);
+    border:0;
+    color:#fff;
+    font-size:18px;
+    cursor:pointer;
+    transition:background 0.2s ease,transform 0.1s ease;
+}
+.extra-grid button:active{
+    transform:scale(0.95);
+    background:#444;
+}
+.calculator{
+    display:grid;
+    grid-template-columns:3fr 1fr;
+    gap:var(--button-gap);
+    width:100%;
+}
+.col-left{
+    display:flex;
+    flex-direction:column;
+    gap:var(--button-gap);
+}
+.row{
+    display:flex;
+    gap:var(--button-gap);
+}
+.digits{
+    display:flex;
+    flex-direction:column;
+    gap:var(--button-gap);
+}
+.digits-row{
+    display:flex;
+    gap:var(--button-gap);
+}
+button.btn{
+    width:var(--button-size);
+    height:var(--button-size);
+    border-radius:50%;
+    border:0;
+    font-size:28px;
+    color:#fff;
+    background:var(--muted);
+    cursor:pointer;
+    transition:background 0.2s ease,transform 0.1s ease;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex:1;
+}
+button.btn:active{
+    transform:scale(0.95);
+}
+.btn.zero{
+    flex:2;
+    border-radius:var(--border-radius);
+    justify-content:flex-start;
+    padding-left:28px;
+}
+.btn.top{
+    background:var(--light);
+    color:#000;
+    font-weight:600;
+}
+.btn.top:active{
+    background:#bbb;
+}
+.col-right{
+    display:flex;
+    flex-direction:column;
+    gap:var(--button-gap);
+}
+.btn.op{
+    background:var(--ios-yellow);
+    color:#fff;
+    font-size:32px;
+    width:100%;
+}
+.btn.op:active{
+    background:#e0942e;
+}
+.wrapper.compact{
+    gap:10px;
+}
+.main-area.compact{
+    gap:10px;
+}
+@media (max-width:420px){
+    :root{
+        --button-size:65px;
+        --button-gap:8px;
+    }
+    .wrapper{
+        max-width:100%;
+    }
+    #display{
+        font-size:42px;
+        padding:18px 22px;
+        min-height:70px;
+    }
+}
+@media (max-width:380px){
+    :root{
+        --button-size:60px;
+        --button-gap:6px;
+    }
+    body{
+        padding:15px;
+    }
+    #display{
+        font-size:36px;
+        padding:15px 20px;
+        min-height:65px;
+    }
+    button.btn{
+        font-size:24px;
+    }
+    .btn.zero{
+        padding-left:24px;
+    }
+    .extra-grid button{
+        height:55px;
+        font-size:16px;
+    }
+}
