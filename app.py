@@ -63,6 +63,17 @@ def safe_eval(expression):
 def index():
     return render_template('index.html')
 
+def show_help():
+    print("Доступные команды:")
+    print("+ : Сложение двух чисел")
+    print("- : Вычитание двух чисел")
+    print("* : Умножение двух чисел")
+    print("/ : Деление двух чисел")
+    print("** : Возведение первого числа в степень второго")
+    print("sqrt : Извлечение квадратного корня из числа")
+    print("help : Показать эту справку")
+    print("exit : Выйти из программы")
+
 @app.route('/calculate', methods=['POST'])
 def calculate():
     try:
@@ -88,4 +99,25 @@ def calculate():
         return jsonify({'result': f'Ошибка сервера: {str(e)}'})
 
 if __name__ == '__main__':
+    print("=== КАЛЬКУЛЯТОР - СПРАВКА ===")
+print("")
+print("Доступные операции:")
+print("+    : Сложение двух чисел")
+print("-    : Вычитание двух чисел")  
+print("*    : Умножение двух чисел")
+print("/    : Деление двух чисел")
+print("**   : Возведение первого числа в степень второго")
+print("sqrt : Извлечение квадратного корня из числа")
+print("")
+print("Дополнительные функции:")
+print("sin(x)  : Синус угла")
+print("cos(x)  : Косинус угла")
+print("tan(x)  : Тангенс угла")
+print("log(x)  : Десятичный логарифм")
+print("ln(x)   : Натуральный логарифм")
+print("x%     : Процент")
+print("")
+print("help : Показать эту справку")
+print("exit : Выйти из программы")
+print("========================")
     app.run(debug=True, port=5000)
